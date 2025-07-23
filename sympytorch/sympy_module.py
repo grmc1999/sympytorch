@@ -235,14 +235,18 @@ class _Node(torch.nn.Module, Generic[ExprType]):
 
 
 class SymPyModule(torch.nn.Module):
-    def __init__(self, *, expressions, extra_funcs=None, **kwargs):
+    def __init__(self, *, expressions, extra_funcs=None, update_funcs=None ,**kwargs):
         super().__init__(**kwargs)
 
         expressions = tuple(expressions)
 
+        if update_funcs is None:
+            update_funcs = {}
+        _func_lookup = _global_func_lookup.update(update_funcs)
+
         if extra_funcs is None:
             extra_funcs = {}
-        _func_lookup = co.ChainMap(_global_func_lookup, extra_funcs)
+        _func_lookup = co.ChainMap(_func_lookup, extra_funcs)
 
         _memodict = {}
         self._nodes: Sequence[_Node] = torch.nn.ModuleList(  # type: ignore
@@ -263,4 +267,5 @@ class SymPyModule(torch.nn.Module):
     def forward(self, **symbols: Any) -> torch.Tensor:
         out = [node(symbols) for node in self._nodes]
         out = torch.broadcast_tensors(*out)
-        return torch.stack(out, dim=-1)
+        return torch.stack(out, dim=-1) 
+
