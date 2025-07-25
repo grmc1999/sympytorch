@@ -234,6 +234,7 @@ class _Node(torch.nn.Module, Generic[ExprType]):
         return self._torch_func(*args)
 
 
+
 class SymPyModule(torch.nn.Module):
     def __init__(self, *, expressions, extra_funcs=None, update_funcs=None ,**kwargs):
         super().__init__(**kwargs)
